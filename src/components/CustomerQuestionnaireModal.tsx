@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, ChevronDown, Sparkles, Send, AlertCircle, MessageSquare, PhoneCall } from 'lucide-react';
 import { Lead } from '../types';
+import { BrandLogo } from './BrandLogo';
 
 interface CustomerQuestionnaireModalProps {
   isOpen: boolean;
@@ -99,15 +100,7 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
         
         {/* Modal Header */}
         <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center border border-orange-500/30">
-              <Sparkles className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <h3 className="font-extrabold text-white text-base">Prakash Graphic Designer</h3>
-              <p className="text-slate-400 text-xs">Request Free Instant Quotation</p>
-            </div>
-          </div>
+          <BrandLogo size="sm" showTagline={true} showBadge={true} />
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"

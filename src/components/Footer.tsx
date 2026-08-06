@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, ShieldCheck, Lock, PhoneCall, Mail, MapPin, LayoutDashboard, Twitter, Instagram, Facebook, Linkedin, ArrowRight } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface FooterProps {
   onOpenAdmin: () => void;
@@ -49,14 +50,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenQuestionnaire
           
           {/* Brand Info */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md">
-                <Sparkles className="w-5 h-5 text-amber-300" />
-              </div>
-              <span className="font-extrabold text-white text-lg">Prakash Graphic Designer</span>
-            </div>
+            <BrandLogo size="lg" showTagline={true} showBadge={true} />
             <p className="text-xs leading-relaxed text-slate-400">
-              Nashik's premier web design & development studio. Custom corporate sites, hospital portals, school management engines, restaurant booking, and e-commerce apps with built-in CRM.
+              Nashik's premier web design & graphic studio. Custom corporate sites, billing software, graphic design, logo design, brand identity & digital marketing.
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-400">
               <ShieldCheck className="w-4 h-4" />

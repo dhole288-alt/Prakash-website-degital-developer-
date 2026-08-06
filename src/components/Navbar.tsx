@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, MessageSquare, Sparkles, LayoutDashboard, Menu, X, ShieldCheck, Mail, MapPin } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface NavbarProps {
   onOpenQuestionnaire: () => void;
@@ -80,30 +81,18 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Main Navbar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
         
         {/* Brand Logo */}
-        <div 
+        <BrandLogo 
+          size="md"
+          showTagline={true}
+          showBadge={true}
           onClick={() => {
             setActiveView('public');
             setActiveTab('home');
           }}
-          className="flex items-center gap-3 cursor-pointer group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-400 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg tracking-tight text-white">
-                Prakash Graphic Designer
-              </span>
-            </div>
-            <p className="text-[11px] font-medium text-blue-400 tracking-wide">
-              Website Design & Development Studio
-            </p>
-          </div>
-        </div>
+        />
 
         {/* Desktop Navigation Links */}
         <nav className="hidden xl:flex items-center gap-4 text-xs font-semibold text-slate-300">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Award, CheckCircle2, ShieldCheck, MapPin, Users, Sparkles, Code2, HeartHandshake } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 export const AboutSection: React.FC = () => {
   return (
@@ -13,6 +14,10 @@ export const AboutSection: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               <span>About Prakash Graphic Designer</span>
+            </div>
+
+            <div className="py-2">
+              <BrandLogo size="xl" showTagline={true} showBadge={true} />
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
