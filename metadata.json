@@ -1,0 +1,6 @@
+{
+  "name": "Lead Management System & CRM",
+  "description": "Digital Agency Website with Quick Lead Capture, Comprehensive Customer Questionnaire, Admin CRM Dashboard with Click-to-Call, WhatsApp Integration, Excel/CSV Export/Import, Analytics, and Notifications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
