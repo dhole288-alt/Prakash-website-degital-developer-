@@ -23,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'home', label: 'Home' },
-    { id: 'about', label: 'About' },
+    { id: 'featured-solutions', label: 'App & Software' },
     { id: 'services', label: 'Services' },
     { id: 'ai-solutions', label: 'AI Solutions' },
     { id: 'tech-stack', label: 'Tech Stack' },

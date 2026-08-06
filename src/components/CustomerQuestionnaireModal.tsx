@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ChevronRight, ChevronLeft, Sparkles, Send, ShieldCheck, HelpCircle } from 'lucide-react';
+import { X, CheckCircle2, ChevronDown, Sparkles, Send, CreditCard, AlertCircle } from 'lucide-react';
 import { Lead } from '../types';
 
 interface CustomerQuestionnaireModalProps {
@@ -15,25 +15,13 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
   onSuccessSubmit,
   initialService
 }) => {
-  const [step, setStep] = useState(1);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    mobile: '',
-    whatsapp: '',
-    email: '',
-    businessName: '',
-    businessType: 'Retail & Local Business',
-    city: 'Nashik',
-    websiteType: initialService || 'Business Website',
-    pagesCount: '1-5 Pages',
-    needDomain: 'Yes' as 'Yes' | 'No',
-    needHosting: 'Yes' as 'Yes' | 'No',
-    needLogo: 'Yes' as 'Yes' | 'No',
-    budget: '₹15,000 - ₹30,000',
-    expectedDelivery: '',
-    additionalReqs: ''
-  });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [serviceCategory, setServiceCategory] = useState(initialService || 'Website development');
+  const [siteType, setSiteType] = useState<'Static' | 'Dynamic'>('Static');
+  const [pageFrom, setPageFrom] = useState(1);
+  const [pageTo, setPageTo] = useState(1);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedLead, setSubmittedLead] = useState<Lead | null>(null);
@@ -41,24 +29,44 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
   if (!isOpen) return null;
 
-  const handleNext = () => {
-    if (step === 1) {
-      if (!formData.name.trim() || !formData.mobile.trim() || !formData.email.trim()) {
-        setErrorMsg('Please complete your Full Name, Mobile Number, and Email Address.');
-        return;
-      }
-    }
-    setErrorMsg('');
-    setStep(prev => Math.min(prev + 1, 3));
+  const serviceCategories = [
+    'Service Category',
+    'Application development',
+    'Software development',
+    'Website development',
+    'Billing software',
+    'Digital Marketing'
+  ];
+
+  const pageOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30];
+
+  const calculateEstimate = () => {
+    const totalPages = Math.max(pageFrom, pageTo);
+    let baseRate = siteType === 'Static' ? 1500 : 3500;
+    if (serviceCategory === 'Application development') baseRate = 8000;
+    if (serviceCategory === 'Software development') baseRate = 12000;
+    if (serviceCategory === 'Billing software') baseRate = 9500;
+    if (serviceCategory === 'Digital Marketing') baseRate = 4500;
+
+    const estimatedTotal = baseRate + (totalPages - 1) * (siteType === 'Static' ? 800 : 1500);
+    return { totalPages, estimatedTotal };
   };
 
-  const handlePrev = () => {
-    setErrorMsg('');
-    setStep(prev => Math.max(prev - 1, 1));
-  };
+  const { totalPages, estimatedTotal } = calculateEstimate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!name.trim() || !email.trim() || !phone.trim()) {
+      setErrorMsg('Please enter your Name, Email, and Phone Number.');
+      return;
+    }
+
+    if (serviceCategory === 'Service Category') {
+      setErrorMsg('Please select a valid Service Category from the dropdown.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMsg('');
 
@@ -67,42 +75,36 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formData.name.trim(),
-          mobile: formData.mobile.trim(),
-          whatsapp: formData.whatsapp.trim() || formData.mobile.trim(),
-          email: formData.email.trim(),
-          businessName: formData.businessName.trim() || 'N/A',
-          businessCategory: formData.businessType,
-          city: formData.city.trim() || 'Nashik',
-          service: formData.websiteType,
-          websiteType: formData.websiteType,
-          pagesCount: formData.pagesCount,
-          budget: formData.budget,
-          deliveryDate: formData.expectedDelivery || 'Flexible',
-          message: `Scope Questionnaire Submission:\n- Industry: ${formData.businessType}\n- Website Type: ${formData.websiteType}\n- Pages: ${formData.pagesCount}\n- Need Domain: ${formData.needDomain}\n- Need Hosting: ${formData.needHosting}\n- Need Logo: ${formData.needLogo}\n- Notes: ${formData.additionalReqs}`,
-          source: 'Scope Questionnaire Modal',
-          questionnaire: {
-            businessType: formData.businessType,
-            websiteType: formData.websiteType,
-            pagesCount: formData.pagesCount,
-            needDomain: formData.needDomain,
-            needHosting: formData.needHosting,
-            needLogo: formData.needLogo,
-            expectedDelivery: formData.expectedDelivery || 'Flexible',
-            additionalReqs: formData.additionalReqs
-          }
+          name: name.trim(),
+          mobile: phone.trim(),
+          whatsapp: phone.trim(),
+          email: email.trim(),
+          businessName: `${siteType} ${serviceCategory}`,
+          businessCategory: serviceCategory,
+          city: 'Nashik',
+          service: serviceCategory,
+          websiteType: `${siteType} (${serviceCategory})`,
+          pagesCount: `${totalPages} Page(s) (${pageFrom} to ${pageTo})`,
+          budget: `Est. ₹${estimatedTotal.toLocaleString('en-IN')}`,
+          deliveryDate: 'Flexible',
+          message: `Modal Calculator Submission:\n- Category: ${serviceCategory}\n- Type: ${siteType}\n- Pages Range: ${pageFrom} to ${pageTo} (${totalPages} Total)\n- Est. Quote: ₹${estimatedTotal.toLocaleString('en-IN')}`,
+          source: 'Interactive Scope Modal'
         })
       });
 
       const data = await response.json();
+
       if (data.success) {
         setSubmittedLead(data.lead);
         onSuccessSubmit(data.lead);
+        setName('');
+        setEmail('');
+        setPhone('');
       } else {
-        setErrorMsg(data.message || 'Error saving questionnaire scope.');
+        setErrorMsg(data.message || 'Error processing request.');
       }
     } catch (err) {
-      setErrorMsg('Network error. Please try submitting again.');
+      setErrorMsg('Network connection error.');
     } finally {
       setIsSubmitting(false);
     }
@@ -110,7 +112,7 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl my-8 overflow-hidden shadow-2xl text-slate-100 flex flex-col max-h-[90vh]">
+      <div className="bg-slate-900 border-2 border-slate-800 rounded-3xl w-full max-w-lg my-8 overflow-hidden shadow-2xl text-slate-100 flex flex-col relative">
         
         {/* Modal Header */}
         <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
@@ -119,8 +121,8 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base">Prakash Graphic Designer • Scope Builder</h3>
-              <p className="text-slate-400 text-xs">Build your custom website specification in 3 easy steps</p>
+              <h3 className="font-extrabold text-white text-base">Prakash Graphic Designer</h3>
+              <p className="text-slate-400 text-xs">Instant Price & Service Calculator</p>
             </div>
           </div>
           <button
@@ -131,379 +133,209 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
           </button>
         </div>
 
-        {/* Step Progress Bar */}
-        {!submittedLead && (
-          <div className="px-6 py-3 bg-slate-900/60 border-b border-slate-800 flex items-center justify-between text-xs font-semibold">
-            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-blue-400' : 'text-slate-500'}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>1</span>
-              <span>Contact & Business</span>
-            </div>
-            <div className="h-0.5 flex-1 mx-3 bg-slate-800">
-              <div className="h-full bg-blue-500 transition-all" style={{ width: step === 1 ? '33%' : step === 2 ? '66%' : '100%' }} />
-            </div>
-            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-blue-400' : 'text-slate-500'}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>2</span>
-              <span>Website Specs</span>
-            </div>
-            <div className="h-0.5 flex-1 mx-3 bg-slate-800">
-              <div className="h-full bg-blue-500 transition-all" style={{ width: step === 3 ? '100%' : '0%' }} />
-            </div>
-            <div className={`flex items-center gap-2 ${step >= 3 ? 'text-blue-400' : 'text-slate-500'}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>3</span>
-              <span>Budget & Timeline</span>
-            </div>
-          </div>
-        )}
-
-        {/* Body Content */}
-        <div className="p-6 overflow-y-auto flex-1">
+        {/* Modal Body */}
+        <div className="p-6 overflow-y-auto">
           {errorMsg && (
-            <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs">
-              {errorMsg}
+            <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
           {submittedLead ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                <CheckCircle2 className="w-10 h-10" />
+              <div className="w-14 h-14 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-2xl font-extrabold text-white">Project Scope Saved into CRM!</h4>
-              <p className="text-slate-300 text-xs sm:text-sm max-w-md mx-auto">
-                Thank you, <span className="font-bold text-white">{submittedLead.name}</span>! Your customized project scope for <span className="text-blue-400 font-semibold">{submittedLead.service}</span> has been logged. Prakash Dhole will contact you shortly.
+              <h4 className="text-2xl font-extrabold text-white">Quotation Saved!</h4>
+              <p className="text-slate-300 text-xs sm:text-sm max-w-sm mx-auto">
+                Thank you, <span className="font-bold text-white">{submittedLead.name}</span>! Your estimate for <span className="text-blue-400 font-semibold">{submittedLead.service}</span> has been saved into our CRM.
               </p>
-              
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-left text-xs font-mono space-y-2 mb-4 text-slate-300">
+
+              <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl text-left text-xs font-mono space-y-2 mb-4 text-slate-300">
                 <div className="flex justify-between border-b border-slate-800 pb-2">
                   <span className="text-slate-400">Ref ID:</span>
                   <span className="text-blue-400 font-bold">{submittedLead.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Website & Pages:</span>
-                  <span className="text-slate-200">{submittedLead.service} ({submittedLead.questionnaire?.pagesCount})</span>
+                  <span className="text-slate-400">Category & Type:</span>
+                  <span className="text-slate-200">{submittedLead.service}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Budget & Target:</span>
-                  <span className="text-emerald-400">{submittedLead.budget} (Delivery: {submittedLead.questionnaire?.expectedDelivery || 'Flexible'})</span>
+                  <span className="text-slate-400">Est. Total Quote:</span>
+                  <span className="text-emerald-400 font-sans font-bold text-sm">{submittedLead.budget}</span>
                 </div>
               </div>
 
-              <button
-                onClick={onClose}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition-all cursor-pointer"
-              >
-                Close Window
-              </button>
+              <div className="flex gap-2">
+                <a
+                  href={`https://wa.me/918055239255?text=${encodeURIComponent(`Hello Prakash, I placed a quote for ${submittedLead.service} (${submittedLead.budget}). Ref: ${submittedLead.id}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center transition-all"
+                >
+                  WhatsApp Direct Order
+                </a>
+                <button
+                  onClick={onClose}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-4 py-3 rounded-xl transition-all"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              
-              {/* STEP 1 */}
-              {step === 1 && (
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-                    Step 1: Your Contact & Business Information
-                  </h4>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Full Name <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g. Ramesh Dhole"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Mobile Number <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        value={formData.mobile}
-                        onChange={e => setFormData({ ...formData, mobile: e.target.value })}
-                        placeholder="e.g. +91 8055239255"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        WhatsApp Number
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.whatsapp}
-                        onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
-                        placeholder="WhatsApp Number"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Email Address <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="ramesh@example.com"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Business / Company Name
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.businessName}
-                        onChange={e => setFormData({ ...formData, businessName: e.target.value })}
-                        placeholder="e.g. Nashik Enterprises"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        City / Location
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={e => setFormData({ ...formData, city: e.target.value })}
-                        placeholder="e.g. Nashik, Mumbai, Pune"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 2 */}
-              {step === 2 && (
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-                    Step 2: Technical & Website Scope
-                  </h4>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Required Website Type
-                      </label>
-                      <select
-                        value={formData.websiteType}
-                        onChange={e => setFormData({ ...formData, websiteType: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="Business Website">Business Website</option>
-                        <option value="Company Website">Company Website</option>
-                        <option value="School Website">School Website</option>
-                        <option value="Hospital Website">Hospital Website</option>
-                        <option value="Restaurant Website">Restaurant Website</option>
-                        <option value="Hotel Website">Hotel Website</option>
-                        <option value="Portfolio Website">Portfolio Website</option>
-                        <option value="E-commerce Website">E-commerce Website</option>
-                        <option value="Landing Page">Landing Page</option>
-                        <option value="Website Redesign">Website Redesign</option>
-                        <option value="Website Maintenance">Website Maintenance</option>
-                        <option value="SEO">SEO</option>
-                        <option value="Google Business Profile">Google Business Profile</option>
-                        <option value="Domain & Hosting">Domain & Hosting</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Estimated Number of Pages
-                      </label>
-                      <select
-                        value={formData.pagesCount}
-                        onChange={e => setFormData({ ...formData, pagesCount: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="1 Page (Landing Page)">1 Page (Landing Page)</option>
-                        <option value="1-5 Pages">1-5 Pages (Starter Website)</option>
-                        <option value="5-10 Pages">5-10 Pages (Standard Business)</option>
-                        <option value="10-20 Pages">10-20 Pages (Pro Corporate)</option>
-                        <option value="20+ Pages">20+ Pages (Portal / E-com)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Yes / No Toggles */}
-                  <div className="grid grid-cols-3 gap-3 pt-2">
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
-                      <span className="block text-xs text-slate-300 font-medium mb-2">Need Domain?</span>
-                      <div className="flex justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, needDomain: 'Yes' })}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold transition-colors ${formData.needDomain === 'Yes' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-                        >
-                          Yes
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, needDomain: 'No' })}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold transition-colors ${formData.needDomain === 'No' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
-                      <span className="block text-xs text-slate-300 font-medium mb-2">Need Hosting?</span>
-                      <div className="flex justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, needHosting: 'Yes' })}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold transition-colors ${formData.needHosting === 'Yes' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-                        >
-                          Yes
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, needHosting: 'No' })}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold transition-colors ${formData.needHosting === 'No' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
-                      <span className="block text-xs text-slate-300 font-medium mb-2">Need Logo?</span>
-                      <div className="flex justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, needLogo: 'Yes' })}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold transition-colors ${formData.needLogo === 'Yes' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-                        >
-                          Yes
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, needLogo: 'No' })}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold transition-colors ${formData.needLogo === 'No' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3 */}
-              {step === 3 && (
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-                    Step 3: Budget & Target Delivery Timeline
-                  </h4>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Estimated Budget
-                      </label>
-                      <select
-                        value={formData.budget}
-                        onChange={e => setFormData({ ...formData, budget: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="₹5,000 - ₹15,000">₹5,000 - ₹15,000</option>
-                        <option value="₹15,000 - ₹30,000">₹15,000 - ₹30,000</option>
-                        <option value="₹30,000 - ₹50,000">₹30,000 - ₹50,000</option>
-                        <option value="₹50,000 - ₹1,00,000">₹50,000 - ₹1,00,000</option>
-                        <option value="₹1,00,000+">₹1,00,000+ (Custom Portal)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Required Delivery Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.expectedDelivery}
-                        onChange={e => setFormData({ ...formData, expectedDelivery: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Additional Message / Specific Requirements
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={formData.additionalReqs}
-                      onChange={e => setFormData({ ...formData, additionalReqs: e.target.value })}
-                      placeholder="e.g. Razorpay Payment Gateway, Doctor Schedule Table, WhatsApp direct order button, Multilingual support..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Action Footer */}
-              <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
-                {step > 1 ? (
-                  <button
-                    type="button"
-                    onClick={handlePrev}
-                    className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>Back</span>
-                  </button>
-                ) : <div />}
-
-                {step < 3 ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all ml-auto cursor-pointer"
-                  >
-                    <span>Next Step</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-lg transition-all ml-auto cursor-pointer"
-                  >
-                    {isSubmitting ? (
-                      <span>Saving Scope...</span>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        <span>Submit Project Scope</span>
-                      </>
-                    )}
-                  </button>
-                )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name Input */}
+              <div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Name"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
               </div>
 
+              {/* Email Input */}
+              <div>
+                <input
+                  type="email"
+                  required
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
+              </div>
+
+              {/* Phone Number Input */}
+              <div>
+                <input
+                  type="tel"
+                  required
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
+              </div>
+
+              {/* Service Category Dropdown (Photo 2) */}
+              <div className="relative">
+                <select
+                  value={serviceCategory}
+                  onChange={(e) => {
+                    setServiceCategory(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer"
+                >
+                  {serviceCategories.map((cat, idx) => (
+                    <option key={idx} value={cat} className="bg-slate-900 text-white py-2">
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {/* Toggle Buttons: Static vs Dynamic (Photo 1) */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setSiteType('Static')}
+                  className={`py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                    siteType === 'Static'
+                      ? 'bg-blue-900/90 border-2 border-blue-500 text-white shadow-lg shadow-blue-600/20'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Static
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSiteType('Dynamic')}
+                  className={`py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                    siteType === 'Dynamic'
+                      ? 'bg-blue-900/90 border-2 border-blue-500 text-white shadow-lg shadow-blue-600/20'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Dynamic
+                </button>
+              </div>
+
+              {/* Number of Pages: [1 ▾] to [1 ▾] (Photo 1) */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs text-slate-300 font-medium">
+                  <span>Number of Pages</span>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={pageFrom}
+                      onChange={(e) => setPageFrom(Number(e.target.value))}
+                      className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                    >
+                      {pageOptions.map((num) => (
+                        <option key={num} value={num} className="bg-slate-900 text-white">
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-slate-400">to</span>
+                    <select
+                      value={pageTo}
+                      onChange={(e) => setPageTo(Number(e.target.value))}
+                      className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                    >
+                      {pageOptions.map((num) => (
+                        <option key={num} value={num} className="bg-slate-900 text-white">
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Display Output Box (Photo 1) */}
+                <div className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-200 flex items-center justify-between">
+                  <span className="text-slate-400 text-xs">Total Estimated Pages:</span>
+                  <span className="text-blue-400 font-extrabold text-base">{totalPages}</span>
+                </div>
+              </div>
+
+              {/* Price Banner */}
+              <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between text-xs">
+                <span className="text-slate-400">Est. Starting Price:</span>
+                <span className="text-emerald-400 font-extrabold text-sm">₹{estimatedTotal.toLocaleString('en-IN')}</span>
+              </div>
+
+              {/* Blue CTA Button: Proceed to Payment */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-sm py-3.5 px-6 rounded-2xl shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer mt-2"
+              >
+                {isSubmitting ? (
+                  <span>Processing...</span>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4 text-cyan-300" />
+                    <span>Proceed to Payment</span>
+                  </>
+                )}
+              </button>
             </form>
           )}
         </div>

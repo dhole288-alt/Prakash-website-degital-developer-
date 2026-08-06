@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
+import { FeaturedSolutionsSection } from './components/FeaturedSolutionsSection';
 import { ServicesSection } from './components/ServicesSection';
 import { AiSolutionsSection } from './components/AiSolutionsSection';
 import { TechArsenalSection } from './components/TechArsenalSection';
@@ -191,6 +192,9 @@ export default function App() {
           <HeroSection
             onOpenQuestionnaire={handleOpenQuestionnaire}
             onSuccessSubmit={handleLeadSuccessSubmit}
+          />
+          <FeaturedSolutionsSection
+            onOpenQuestionnaire={handleOpenQuestionnaire}
           />
           <AboutSection />
           <ServicesSection
