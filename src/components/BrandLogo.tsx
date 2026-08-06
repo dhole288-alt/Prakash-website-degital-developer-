@@ -1,6 +1,5 @@
 import React from 'react';
-
-const logoImg = '/src/assets/images/prakash_logo_1786038840552.jpg';
+import logoImg from '../assets/images/prakash_logo_1786038840552.jpg';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -41,6 +40,12 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
             alt="प्रकाश ग्राफिक्स डिझायनर - Prakash Graphic Designer HD Logo" 
             className="w-full h-full object-cover rounded-lg sm:rounded-xl"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (target.src !== window.location.origin + '/prakash_logo.jpg') {
+                target.src = '/prakash_logo.jpg';
+              }
+            }}
           />
         </div>
 
