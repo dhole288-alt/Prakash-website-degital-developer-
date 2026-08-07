@@ -49,9 +49,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Top Bar for Contact Details */}
       <div className="bg-slate-900/90 border-b border-slate-800/80 text-xs py-1.5 px-4 sm:px-6 lg:px-8 text-slate-300 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4 flex-wrap">
-          <a href="tel:+918055239255" className="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
+          <a href="tel:+918055239252" className="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
             <Phone className="w-3.5 h-3.5 text-blue-400" />
-            <span className="font-semibold">+91 8055239255</span>
+            <span className="font-semibold">+91 8055239252</span>
           </a>
           <a href="mailto:prakashdhole965@gmail.com" className="hidden sm:flex items-center gap-1.5 hover:text-blue-400 transition-colors">
             <Mail className="w-3.5 h-3.5 text-blue-400" />
@@ -65,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <div className="flex items-center gap-3">
           <a
-            href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
+            href="https://wa.me/918055239252?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium transition-colors cursor-pointer"
@@ -200,7 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               Request Free Quote
             </button>
             <div className="flex justify-between items-center text-xs text-slate-400 px-1 pt-1">
-              <span>Call: +91 8055239255</span>
+              <span>Call: +91 8055239252</span>
               <span>Location: Nashik</span>
             </div>
           </div>

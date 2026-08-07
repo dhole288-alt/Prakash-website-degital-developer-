@@ -44,17 +44,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenQuestionnaire })
               </button>
 
               <a
-                href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
+                href="https://wa.me/918055239252?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-5 py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>WhatsApp (+91 8055239255)</span>
+                <span>WhatsApp (+91 8055239252)</span>
               </a>
 
               <a
-                href="tel:+918055239255"
+                href="tel:+918055239252"
                 className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm px-5 py-3.5 rounded-xl border border-slate-700 shadow-md flex items-center gap-2 transition-all"
               >
                 <Phone className="w-4 h-4 text-orange-400" />

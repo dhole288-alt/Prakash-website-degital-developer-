@@ -27,7 +27,7 @@ export const FaqSection: React.FC = () => {
     },
     {
       q: 'How do enquiries from the website reach me?',
-      a: 'Every enquiry automatically routes to our private Lead CRM, triggers an instant SMS/Email alert to your phone (+91 8055239255), and gives the customer an instant WhatsApp chat link.'
+      a: 'Every enquiry automatically routes to our private Lead CRM, triggers an instant SMS/Email alert to your phone (+91 8055239252), and gives the customer an instant WhatsApp chat link.'
     }
   ];
 

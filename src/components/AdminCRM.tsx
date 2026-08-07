@@ -5,6 +5,7 @@ import { exportLeadsToExcel, exportLeadsToCSV } from '../lib/excelUtils';
 import { openWhatsAppChat, makePhoneCall, sendDirectEmail } from '../lib/whatsappUtils';
 import { LeadDetailModal } from './LeadDetailModal';
 import { ImportLeadsModal } from './ImportLeadsModal';
+import { GoogleSheetsModal } from './GoogleSheetsModal';
 import { AnalyticsView } from './AnalyticsView';
 import { NotificationLogsView } from './NotificationLogsView';
 
@@ -44,6 +45,7 @@ export const AdminCRM: React.FC<AdminCRMProps> = ({
   // Modals state
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
 
   // Services & Sources options derived dynamically
   const availableServices = Array.from(new Set(leads.map(l => l.service))).filter(Boolean);
@@ -115,6 +117,15 @@ export const AdminCRM: React.FC<AdminCRMProps> = ({
             title="Refresh CRM Data"
           >
             <RefreshCw className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => setIsSheetsModalOpen(true)}
+            className="flex items-center gap-2 bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer shadow-md"
+            title="Configure Google Sheet Auto-Sync"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+            <span>Google Sheets Sync</span>
           </button>
 
           <button
@@ -519,6 +530,12 @@ export const AdminCRM: React.FC<AdminCRMProps> = ({
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImportSuccess={onRefreshData}
+      />
+
+      {/* GOOGLE SHEETS LIVE SYNC CONFIG MODAL */}
+      <GoogleSheetsModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
       />
 
     </div>

@@ -16,7 +16,15 @@ export function openWhatsAppChat(mobile: string, leadName: string, serviceRequir
   const cleanPhone = formatPhoneNumberForWhatsApp(mobile);
   const message = `Hello ${leadName}, thank you for reaching out to our Digital Agency regarding ${serviceRequired || 'your website enquiry'}. I'm following up on your request. When would be a good time to connect?`;
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.click();
+  } catch (e) {
+    console.warn('WhatsApp open notice:', e);
+  }
 }
 
 export function makePhoneCall(mobile: string) {

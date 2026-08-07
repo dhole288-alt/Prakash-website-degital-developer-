@@ -40,7 +40,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onSuccessSubmit 
 
               <div className="space-y-4 text-xs sm:text-sm">
                 <a
-                  href="tel:+918055239255"
+                  href="tel:+918055239252"
                   className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors group"
                 >
                   <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -48,12 +48,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onSuccessSubmit 
                   </div>
                   <div>
                     <span className="text-slate-400 text-[11px] block">Direct Mobile Line</span>
-                    <span className="font-bold text-white text-sm">+91 8055239255</span>
+                    <span className="font-bold text-white text-sm">+91 8055239252</span>
                   </div>
                 </a>
 
                 <a
-                  href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
+                  href="https://wa.me/918055239252?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors group cursor-pointer"
@@ -63,7 +63,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onSuccessSubmit 
                   </div>
                   <div>
                     <span className="text-slate-400 text-[11px] block">WhatsApp Chat</span>
-                    <span className="font-bold text-emerald-400 text-sm">+91 8055239255 (Instant Response)</span>
+                    <span className="font-bold text-emerald-400 text-sm">+91 8055239252 (Instant Response)</span>
                   </div>
                 </a>
 

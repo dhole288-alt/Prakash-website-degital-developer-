@@ -4,8 +4,8 @@ export const initialLeads: Lead[] = [
   {
     id: 'lead-101',
     name: 'Rajesh Sharma',
-    mobile: '+918055239255',
-    whatsapp: '+918055239255',
+    mobile: '+918055239252',
+    whatsapp: '+918055239252',
     email: 'rajesh@sharmatraders.com',
     businessName: 'Sharma Global Traders',
     businessCategory: 'E-Commerce & Retail',

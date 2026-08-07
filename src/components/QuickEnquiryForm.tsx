@@ -89,12 +89,17 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
 
     // Submit to Google Sheets and Express backend
     try {
-      await submitToGoogleSheets(newLead);
-    } catch (err) {
+      const res = await submitToGoogleSheets(newLead);
+      if (res && res.success === false) {
+        setErrorMsg(res.message || 'Submission failed. Please check your network connection.');
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err: any) {
       console.warn('Submission network notice:', err);
     }
 
-    // Clear form fields
+    // Clear form fields after successful submission
     setName('');
     setEmail('');
     setPhone('');
@@ -118,7 +123,15 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
     );
     
     setTimeout(() => {
-      window.open(`https://wa.me/918055239255?text=${waText}`, '_blank', 'noopener,noreferrer');
+      try {
+        const a = document.createElement('a');
+        a.href = `https://wa.me/918055239252?text=${waText}`;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.click();
+      } catch (e) {
+        console.warn('WhatsApp popup notice:', e);
+      }
     }, 400);
   };
 
@@ -163,7 +176,7 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
 
         <div className="space-y-3">
           <a
-            href={`https://wa.me/918055239255?text=${encodeURIComponent(
+            href={`https://wa.me/918055239252?text=${encodeURIComponent(
               `Hello Prakash Graphic Designer, I need a website.\n\n` +
               `Ref: ${submittedLead.id}\n` +
               `Name: ${submittedLead.name}\n` +
@@ -177,7 +190,7 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
             className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/30 cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />
-            <span>Connect Directly on WhatsApp (+91 8055239255)</span>
+            <span>Connect Directly on WhatsApp (+91 8055239252)</span>
           </a>
 
           <button
@@ -223,10 +236,11 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
         
         {/* Full Name */}
         <div>
-          <label className="block text-xs font-bold text-slate-200 mb-1">
+          <label htmlFor="quick-name" className="block text-xs font-bold text-slate-200 mb-1">
             Full Name <span className="text-orange-500">*</span>
           </label>
           <input
+            id="quick-name"
             type="text"
             required
             placeholder="Enter your name"
@@ -235,16 +249,17 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
               setName(e.target.value);
               setErrorMsg('');
             }}
-            className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
+            className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
           />
         </div>
 
         {/* Phone Number */}
         <div>
-          <label className="block text-xs font-bold text-slate-200 mb-1">
+          <label htmlFor="quick-phone" className="block text-xs font-bold text-slate-200 mb-1">
             Mobile / WhatsApp Number <span className="text-orange-500">*</span>
           </label>
           <input
+            id="quick-phone"
             type="tel"
             required
             placeholder="+91 Mobile number"
@@ -253,16 +268,17 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
               setPhone(e.target.value);
               setErrorMsg('');
             }}
-            className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
+            className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
           />
         </div>
 
         {/* Business Name */}
         <div>
-          <label className="block text-xs font-bold text-slate-200 mb-1">
+          <label htmlFor="quick-business" className="block text-xs font-bold text-slate-200 mb-1">
             Business / Shop / Company Name <span className="text-orange-500">*</span>
           </label>
           <input
+            id="quick-business"
             type="text"
             required
             placeholder="Enter business name"
@@ -271,23 +287,24 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
               setBusinessName(e.target.value);
               setErrorMsg('');
             }}
-            className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
+            className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
           />
         </div>
 
         {/* Service Category */}
         <div>
-          <label className="block text-xs font-bold text-slate-200 mb-1">
+          <label htmlFor="quick-category" className="block text-xs font-bold text-slate-200 mb-1">
             Website Type / Service <span className="text-orange-500">*</span>
           </label>
           <div className="relative">
             <select
+              id="quick-category"
               value={serviceCategory}
               onChange={(e) => {
                 setServiceCategory(e.target.value);
                 setErrorMsg('');
               }}
-              className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
+              className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
             >
               {serviceCategories.map((cat, idx) => (
                 <option key={idx} value={cat} className="bg-slate-900 text-white py-2">
@@ -328,14 +345,15 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
 
         {/* Budget Dropdown */}
         <div>
-          <label className="block text-xs font-bold text-slate-200 mb-1">
+          <label htmlFor="quick-budget" className="block text-xs font-bold text-slate-200 mb-1">
             Budget Range <span className="text-orange-500">*</span>
           </label>
           <div className="relative">
             <select
+              id="quick-budget"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-amber-300 font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
+              className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-amber-300 font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
             >
               {budgetOptions.map((b, idx) => (
                 <option key={idx} value={b} className="bg-slate-900 text-white py-2 font-normal">

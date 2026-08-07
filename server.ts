@@ -241,7 +241,7 @@ app.post('/api/leads', (req, res) => {
     id: 'notif-' + Date.now() + '-2',
     leadId: newLead.id,
     type: 'admin_whatsapp',
-    recipient: '+91 8055239255 (Prakash Dhole)',
+    recipient: '+91 8055239252 (Prakash Dhole)',
     subject: `WhatsApp Alert: New Enquiry from ${newLead.name}`,
     sentAt: formattedDate,
     status: 'sent',

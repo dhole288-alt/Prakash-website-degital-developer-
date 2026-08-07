@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, CheckCircle2, ChevronDown, Sparkles, Send, AlertCircle, MessageSquare, PhoneCall, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, CheckCircle2, ChevronDown, Sparkles, Send, AlertCircle, MessageSquare, PhoneCall, Mail, ArrowLeft } from 'lucide-react';
 import { Lead } from '../types';
 import { BrandLogo } from './BrandLogo';
 
@@ -29,6 +29,47 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedLead, setSubmittedLead] = useState<Lead | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const handleBackOrClose = () => {
+    if (window.history.state?.modalOpen) {
+      window.history.back();
+    } else {
+      handleClose();
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      // Push history state so Android hardware/gesture back button closes the modal cleanly
+      window.history.pushState({ modalOpen: true }, '');
+
+      const handlePopState = () => {
+        resetForm();
+        onClose();
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleBackOrClose();
+        }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -111,12 +152,17 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
     // Submit to Google Sheets and Express Backend
     try {
-      await submitToGoogleSheets(newLead);
-    } catch (err) {
+      const res = await submitToGoogleSheets(newLead);
+      if (res && res.success === false) {
+        setErrorMsg(res.message || 'Submission failed. Please check your network connection.');
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err: any) {
       console.warn('Submission network notice:', err);
     }
 
-    // Clear form fields
+    // Clear form fields after successful submission
     setName('');
     setPhone('');
     setEmail('');
@@ -140,9 +186,17 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
     );
 
     // Auto trigger WhatsApp notification link in new tab on desktop/mobile
-    const waUrl = `https://wa.me/918055239255?text=${waText}`;
+    const waUrl = `https://wa.me/918055239252?text=${waText}`;
     setTimeout(() => {
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
+      try {
+        const a = document.createElement('a');
+        a.href = waUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.click();
+      } catch (e) {
+        console.warn('WhatsApp popup notice:', e);
+      }
     }, 400);
   };
 
@@ -157,26 +211,43 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border-2 border-slate-800 rounded-3xl w-full max-w-lg my-6 overflow-hidden shadow-2xl text-slate-100 flex flex-col relative">
-        
-        {/* Modal Header */}
-        <div className="bg-slate-950 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
-          <BrandLogo size="sm" showTagline={true} />
-          <button
-            onClick={() => {
-              resetForm();
-              onClose();
-            }}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
+        onClick={handleBackOrClose}
+        aria-hidden="true"
+      />
 
-        {/* Modal Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto max-h-[80vh]">
+      {/* Scroll container for modal */}
+      <div className="fixed inset-0 z-10 overflow-y-auto pointer-events-none flex items-center justify-center p-3 sm:p-6">
+        <div className="pointer-events-auto bg-slate-900 border-2 border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl text-slate-100 flex flex-col relative overflow-hidden my-auto max-h-[92vh]">
+          
+          {/* Modal Header */}
+          <div className="bg-slate-950 px-4 sm:px-5 py-3.5 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
+            <BrandLogo size="sm" showTagline={true} />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleBackOrClose}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 hover:text-white font-medium flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-700/60"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-orange-400" />
+                <span>Back</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleBackOrClose}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Body */}
+          <div className="p-5 sm:p-6 overflow-y-auto flex-1 min-h-0">
           {errorMsg && (
             <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
@@ -225,7 +296,7 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
               <div className="flex flex-col gap-2.5 pt-2">
                 <a
-                  href={`https://wa.me/918055239255?text=${encodeURIComponent(
+                  href={`https://wa.me/918055239252?text=${encodeURIComponent(
                     `Hello Prakash Graphic Designer, I need a website.\n\n` +
                     `Enquiry Ref: ${submittedLead.id}\n` +
                     `Name: ${submittedLead.name}\n` +
@@ -239,15 +310,15 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
                   className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/25 cursor-pointer"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Notify via WhatsApp (+91 8055239255)</span>
+                  <span>Notify via WhatsApp (+91 8055239252)</span>
                 </a>
 
                 <a
-                  href="tel:+918055239255"
+                  href="tel:+918055239252"
                   className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <PhoneCall className="w-4 h-4 text-orange-400" />
-                  <span>Call Direct (+91 8055239255)</span>
+                  <span>Call Direct (+91 8055239252)</span>
                 </a>
 
                 {submittedLead.email && submittedLead.email !== 'Not Provided' && (
@@ -263,6 +334,7 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
                 )}
 
                 <button
+                  type="button"
                   onClick={() => {
                     resetForm();
                     onClose();
@@ -277,10 +349,11 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name Input */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1">
+                <label htmlFor="modal-name" className="block text-xs font-bold text-slate-200 mb-1">
                   1. Your Name <span className="text-orange-500">*</span>
                 </label>
                 <input
+                  id="modal-name"
                   type="text"
                   required
                   placeholder="Enter your full name"
@@ -289,16 +362,17 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
                     setName(e.target.value);
                     setErrorMsg('');
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
 
               {/* Phone Input */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1">
+                <label htmlFor="modal-phone" className="block text-xs font-bold text-slate-200 mb-1">
                   2. Mobile Number <span className="text-orange-500">*</span>
                 </label>
                 <input
+                  id="modal-phone"
                   type="tel"
                   required
                   placeholder="+91 Mobile or WhatsApp number"
@@ -307,16 +381,17 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
                     setPhone(e.target.value);
                     setErrorMsg('');
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
 
               {/* Business Name Input */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1">
+                <label htmlFor="modal-business" className="block text-xs font-bold text-slate-200 mb-1">
                   3. Business Name <span className="text-orange-500">*</span>
                 </label>
                 <input
+                  id="modal-business"
                   type="text"
                   required
                   placeholder="Enter your shop, company, or clinic name"
@@ -325,23 +400,24 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
                     setBusinessName(e.target.value);
                     setErrorMsg('');
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
 
               {/* Website Type Dropdown */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1">
+                <label htmlFor="modal-type" className="block text-xs font-bold text-slate-200 mb-1">
                   4. Website Type <span className="text-orange-500">*</span>
                 </label>
                 <div className="relative">
                   <select
+                    id="modal-type"
                     value={websiteType}
                     onChange={(e) => {
                       setWebsiteType(e.target.value);
                       setErrorMsg('');
                     }}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
+                    className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
                   >
                     {websiteTypeOptions.map((opt, idx) => (
                       <option key={idx} value={opt} className="bg-slate-900 text-white py-2">
@@ -355,17 +431,18 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
               {/* Budget Dropdown */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1">
+                <label htmlFor="modal-budget" className="block text-xs font-bold text-slate-200 mb-1">
                   5. Budget Range <span className="text-orange-500">*</span>
                 </label>
                 <div className="relative">
                   <select
+                    id="modal-budget"
                     value={budget}
                     onChange={(e) => {
                       setBudget(e.target.value);
                       setErrorMsg('');
                     }}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-amber-300 font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
+                    className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-3 text-base sm:text-sm text-amber-300 font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors appearance-none cursor-pointer"
                   >
                     {budgetOptions.map((b, idx) => (
                       <option key={idx} value={b} className="bg-slate-900 text-white py-2 font-normal">
@@ -379,29 +456,31 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
               {/* Optional Email Input */}
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label htmlFor="modal-email" className="block text-xs font-semibold text-slate-400 mb-1">
                   Email Address (Optional)
                 </label>
                 <input
+                  id="modal-email"
                   type="email"
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-colors"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none transition-colors"
                 />
               </div>
 
               {/* Message Input */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label htmlFor="modal-message" className="block text-xs font-semibold text-slate-300 mb-1">
                   6. Project Details / Requirements
                 </label>
                 <textarea
+                  id="modal-message"
                   rows={3}
                   placeholder="Tell us what features or pages you need..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors resize-none"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl px-4 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors resize-none"
                 />
               </div>
 
@@ -433,5 +512,6 @@ export const CustomerQuestionnaireModal: React.FC<CustomerQuestionnaireModalProp
 
       </div>
     </div>
-  );
+  </div>
+);
 };

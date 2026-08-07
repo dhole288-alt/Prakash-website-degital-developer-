@@ -16,7 +16,9 @@ import { CustomerQuestionnaireModal } from './components/CustomerQuestionnaireMo
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { AdminCRM } from './components/AdminCRM';
 import { Lead, LeadStatus, AnalyticsSummary, NotificationLog, AdminUser } from './types';
-import { Bell } from 'lucide-react';
+import { Bell, FileSpreadsheet } from 'lucide-react';
+import { GoogleSheetsModal } from './components/GoogleSheetsModal';
+import { FloatingContactButtons } from './components/FloatingContactButtons';
 
 export default function App() {
   const [activeView, setActiveView] = useState<'public' | 'admin'>('public');
@@ -30,6 +32,7 @@ export default function App() {
   const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
   const [selectedServiceForModal, setSelectedServiceForModal] = useState<string | undefined>(undefined);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isGlobalSheetsModalOpen, setIsGlobalSheetsModalOpen] = useState(false);
 
   // Toast alert
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -262,8 +265,14 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
       />
 
-      {/* Floating Action Button for Switch between Website & CRM */}
-      <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2">
+      {/* Google Sheets Modal */}
+      <GoogleSheetsModal
+        isOpen={isGlobalSheetsModalOpen}
+        onClose={() => setIsGlobalSheetsModalOpen(false)}
+      />
+
+      {/* Floating Action Button Bar */}
+      <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2 flex-wrap">
         <button
           onClick={() => {
             if (isAdminLoggedIn) {
@@ -272,12 +281,24 @@ export default function App() {
               setIsAdminLoginOpen(true);
             }
           }}
-          className="bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-white px-3.5 py-2 rounded-full shadow-2xl backdrop-blur flex items-center gap-2 cursor-pointer"
+          className="bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-white px-3.5 py-2.5 rounded-full shadow-2xl backdrop-blur flex items-center gap-2 cursor-pointer"
         >
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>{isAdminLoggedIn ? (activeView === 'admin' ? 'View Public Website' : 'View CRM Dashboard') : 'CRM Admin Login'}</span>
         </button>
+
+        <button
+          onClick={() => setIsGlobalSheetsModalOpen(true)}
+          className="bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-full shadow-2xl backdrop-blur flex items-center gap-1.5 cursor-pointer"
+          title="Configure Google Sheet Auto-Sync & Paste Web App URL"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Google Sheets Sync</span>
+        </button>
       </div>
+
+      {/* Floating WhatsApp & Direct Call Widget */}
+      <FloatingContactButtons />
 
     </div>
   );

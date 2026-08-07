@@ -37,11 +37,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenQuestionnaire
               <ArrowRight className="w-4 h-4" />
             </button>
             <a
-              href="tel:+918055239255"
+              href="tel:+918055239252"
               className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm px-6 py-3.5 rounded-xl border border-slate-700 shadow-md flex items-center gap-2 transition-all"
             >
               <PhoneCall className="w-4 h-4 text-emerald-400" />
-              <span>+91 8055239255</span>
+              <span>+91 8055239252</span>
             </a>
           </div>
         </div>
@@ -97,7 +97,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenQuestionnaire
             <h4 className="font-bold text-white text-sm mb-3">Contact & Offices</h4>
             <div className="flex items-center gap-2 text-slate-300">
               <PhoneCall className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-              <span>+91 8055239255</span>
+              <span>+91 8055239252</span>
             </div>
             <div className="flex items-center gap-2 text-slate-300">
               <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />

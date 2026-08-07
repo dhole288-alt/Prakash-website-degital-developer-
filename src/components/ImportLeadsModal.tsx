@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import { parseExcelOrCSVFile } from '../lib/excelUtils';
 import { Lead } from '../types';
 
@@ -19,6 +19,40 @@ export const ImportLeadsModal: React.FC<ImportLeadsModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const handleBackOrClose = () => {
+    if (window.history.state?.importModalOpen) {
+      window.history.back();
+    } else {
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      window.history.pushState({ importModalOpen: true }, '');
+
+      const handlePopState = () => {
+        onClose();
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleBackOrClose();
+        }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -79,27 +113,48 @@ export const ImportLeadsModal: React.FC<ImportLeadsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl text-slate-100 flex flex-col max-h-[85vh]">
-        
-        {/* Header */}
-        <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-              <FileSpreadsheet className="w-4 h-4" />
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
+        onClick={handleBackOrClose}
+        aria-hidden="true"
+      />
+
+      {/* Scroll container for modal */}
+      <div className="fixed inset-0 z-10 overflow-y-auto pointer-events-none flex items-center justify-center p-3 sm:p-6">
+        <div className="pointer-events-auto bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl my-auto overflow-hidden shadow-2xl text-slate-100 flex flex-col max-h-[85vh]">
+          
+          {/* Header */}
+          <div className="bg-slate-950 px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                <FileSpreadsheet className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-sm sm:text-base">Import Leads from Excel / CSV</h3>
+                <p className="text-slate-400 text-xs">Bulk upload lead spreadsheets into the CRM database</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-white text-base">Import Leads from Excel / CSV</h3>
-              <p className="text-slate-400 text-xs">Bulk upload lead spreadsheets into the CRM database</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleBackOrClose}
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 hover:text-white font-medium flex items-center gap-1 transition-colors cursor-pointer border border-slate-700/60 shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-orange-400" />
+                <span>Back</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleBackOrClose}
+                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
         <div className="p-6 overflow-y-auto space-y-4">
           
@@ -197,5 +252,6 @@ export const ImportLeadsModal: React.FC<ImportLeadsModalProps> = ({
 
       </div>
     </div>
-  );
+  </div>
+);
 };

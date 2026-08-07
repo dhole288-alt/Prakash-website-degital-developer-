@@ -77,7 +77,7 @@ export const AboutSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Direct Mobile & WhatsApp Support: +91 8055239255</span>
+                  <span>Direct Mobile & WhatsApp Support: +91 8055239252</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />

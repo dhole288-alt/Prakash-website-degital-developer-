@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Phone, MessageSquare, Mail, Calendar, MapPin, Building, Globe, DollarSign, Clock, ShieldAlert, FileText, Send, User, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Phone, MessageSquare, Mail, Calendar, MapPin, Building, Globe, DollarSign, Clock, ShieldAlert, FileText, Send, User, Trash2, ArrowLeft } from 'lucide-react';
 import { Lead, LeadStatus } from '../types';
 import { openWhatsAppChat, makePhoneCall, sendDirectEmail } from '../lib/whatsappUtils';
 
@@ -21,6 +21,40 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
   const [newNote, setNewNote] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
 
+  const handleBackOrClose = () => {
+    if (window.history.state?.leadDetailOpen) {
+      window.history.back();
+    } else {
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    if (lead) {
+      window.history.pushState({ leadDetailOpen: true }, '');
+
+      const handlePopState = () => {
+        onClose();
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleBackOrClose();
+        }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [lead]);
+
   if (!lead) return null;
 
   const handleAddNoteSubmit = (e: React.FormEvent) => {
@@ -41,29 +75,46 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl text-slate-100 flex flex-col max-h-[90vh]">
-        
-        {/* Top Header */}
-        <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 font-bold text-lg">
-              {lead.name.charAt(0)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-white text-lg">{lead.name}</h3>
-                <span className={`text-xs px-2.5 py-0.5 rounded-full border font-semibold ${statusColors[lead.status]}`}>
-                  {lead.status}
-                </span>
-              </div>
-              <p className="text-slate-400 text-xs">
-                {lead.businessName} • Captured {lead.dateTime} ({lead.source})
-              </p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
+        onClick={handleBackOrClose}
+        aria-hidden="true"
+      />
 
-          <div className="flex items-center gap-2">
+      {/* Scroll container for modal */}
+      <div className="fixed inset-0 z-10 overflow-y-auto pointer-events-none flex items-center justify-center p-3 sm:p-6">
+        <div className="pointer-events-auto bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl my-auto overflow-hidden shadow-2xl text-slate-100 flex flex-col max-h-[90vh]">
+          
+          {/* Top Header */}
+          <div className="bg-slate-950 px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 font-bold text-lg">
+                {lead.name.charAt(0)}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-white text-base sm:text-lg">{lead.name}</h3>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full border font-semibold ${statusColors[lead.status]}`}>
+                    {lead.status}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-xs">
+                  {lead.businessName} • Captured {lead.dateTime} ({lead.source})
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleBackOrClose}
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 hover:text-white font-medium flex items-center gap-1 transition-colors cursor-pointer border border-slate-700/60 shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-orange-400" />
+                <span>Back</span>
+              </button>
             <button
               onClick={() => {
                 if (confirm(`Are you sure you want to delete lead "${lead.name}"?`)) {
@@ -274,5 +325,6 @@ export const LeadDetailModal: React.FC<LeadDetailModalProps> = ({
 
       </div>
     </div>
-  );
+  </div>
+);
 };
