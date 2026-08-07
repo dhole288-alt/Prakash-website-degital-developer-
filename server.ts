@@ -15,15 +15,61 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const LEADS_FILE = path.join(DATA_DIR, 'leads.json');
 const LOGS_FILE = path.join(DATA_DIR, 'notification_logs.json');
 const STATS_FILE = path.join(DATA_DIR, 'stats.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+interface UserAccount {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: 'admin' | 'manager';
+  createdAt: string;
+}
+
+const initialAdminUsers: UserAccount[] = [
+  {
+    id: 'usr-1',
+    email: 'prakashdhole965@gmail.com',
+    password: 'admin123',
+    name: 'Prakash Dhole',
+    role: 'admin',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'usr-2',
+    email: 'admin@agency.com',
+    password: '123456',
+    name: 'Agency Admin',
+    role: 'admin',
+    createdAt: new Date().toISOString()
+  }
+];
+
 // In-memory caching with JSON file backup
 let leadsStore: Lead[] = [];
 let logsStore: NotificationLog[] = [];
+let usersStore: UserAccount[] = [];
 let visitorCount = 1420;
+
+try {
+  if (fs.existsSync(USERS_FILE)) {
+    const raw = fs.readFileSync(USERS_FILE, 'utf-8');
+    usersStore = JSON.parse(raw);
+    if (!Array.isArray(usersStore) || usersStore.length === 0) {
+      usersStore = [...initialAdminUsers];
+      fs.writeFileSync(USERS_FILE, JSON.stringify(usersStore, null, 2));
+    }
+  } else {
+    usersStore = [...initialAdminUsers];
+    fs.writeFileSync(USERS_FILE, JSON.stringify(usersStore, null, 2));
+  }
+} catch (e) {
+  usersStore = [...initialAdminUsers];
+}
 
 try {
   if (fs.existsSync(LEADS_FILE)) {
@@ -80,6 +126,14 @@ function saveStats() {
   }
 }
 
+function saveUsers() {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(usersStore, null, 2));
+  } catch (err) {
+    console.error('Error saving users:', err);
+  }
+}
+
 // Track visitor ping
 app.post('/api/visitor/ping', (req, res) => {
   visitorCount += 1;
@@ -87,12 +141,43 @@ app.post('/api/visitor/ping', (req, res) => {
   res.json({ success: true, totalVisitors: visitorCount });
 });
 
-// Admin Login Route
+// Admin / User Login Route
 app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-  if ((email === 'prakashdhole965@gmail.com' || email === 'admin@agency.com' || email === 'prakash') && (password === 'admin123' || password === '123456')) {
-    res.json({
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: 'Email and password are required.' });
+  }
+
+  const cleanEmail = String(email).trim().toLowerCase();
+  const cleanPassword = String(password).trim();
+
+  // Search in seeded/registered usersStore
+  const foundUser = usersStore.find(
+    u => u.email.toLowerCase() === cleanEmail && u.password === cleanPassword
+  );
+
+  // Fallback for default admin shortcuts
+  if (foundUser) {
+    return res.json({
       success: true,
+      message: 'Login successful!',
+      user: {
+        email: foundUser.email,
+        name: foundUser.name,
+        role: foundUser.role,
+        token: 'adm_session_' + Date.now()
+      }
+    });
+  }
+
+  // Also check default quick shortcuts
+  if (
+    (cleanEmail === 'prakashdhole965@gmail.com' || cleanEmail === 'admin@agency.com' || cleanEmail === 'prakash') &&
+    (cleanPassword === 'admin123' || cleanPassword === '123456')
+  ) {
+    return res.json({
+      success: true,
+      message: 'Login successful via default admin credential!',
       user: {
         email: 'prakashdhole965@gmail.com',
         name: 'Prakash Dhole',
@@ -100,9 +185,72 @@ app.post('/api/auth/login', (req, res) => {
         token: 'adm_session_' + Date.now()
       }
     });
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid admin credentials! Use prakashdhole965@gmail.com / admin123' });
   }
+
+  return res.status(401).json({
+    success: false,
+    message: 'Invalid email or password. You can also Sign Up / Register a new admin account.'
+  });
+});
+
+// Admin / User Sign Up / Register Route
+app.post('/api/auth/register', (req, res) => {
+  const { name, email, password, role } = req.body || {};
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Full Name, Email Address, and Password are required for registration.'
+    });
+  }
+
+  const cleanName = String(name).trim();
+  const cleanEmail = String(email).trim().toLowerCase();
+  const cleanPassword = String(password).trim();
+
+  if (cleanPassword.length < 4) {
+    return res.status(400).json({
+      success: false,
+      message: 'Password must be at least 4 characters long.'
+    });
+  }
+
+  const existingUser = usersStore.find(u => u.email.toLowerCase() === cleanEmail);
+  if (existingUser) {
+    return res.status(400).json({
+      success: false,
+      message: 'An account with this email is already registered. Please log in.'
+    });
+  }
+
+  const newUser: UserAccount = {
+    id: 'usr-' + Date.now(),
+    email: cleanEmail,
+    password: cleanPassword,
+    name: cleanName,
+    role: role === 'manager' ? 'manager' : 'admin',
+    createdAt: new Date().toISOString()
+  };
+
+  usersStore.push(newUser);
+  saveUsers();
+
+  res.status(201).json({
+    success: true,
+    message: 'Admin account registered successfully!',
+    user: {
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+      token: 'adm_session_' + Date.now()
+    }
+  });
+});
+
+// GET list of registered users
+app.get('/api/auth/users', (req, res) => {
+  const safeUsers = usersStore.map(({ password, ...u }) => u);
+  res.json({ success: true, count: safeUsers.length, users: safeUsers });
 });
 
 // GET All Leads with filters
