@@ -65,10 +65,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <div className="flex items-center gap-3">
           <a
-            href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%20I%20want%20a%20website%20quote"
+            href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
+            className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium transition-colors cursor-pointer"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>WhatsApp Us</span>

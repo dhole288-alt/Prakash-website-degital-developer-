@@ -53,10 +53,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onSuccessSubmit 
                 </a>
 
                 <a
-                  href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%20I%20want%20a%20website%20quote"
+                  href="https://wa.me/918055239255?text=Hello%20Prakash%20Graphic%20Designer%2C%20I%20need%20a%20website."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors group"
+                  className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors group cursor-pointer"
                 >
                   <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                     <MessageSquare className="w-5 h-5" />

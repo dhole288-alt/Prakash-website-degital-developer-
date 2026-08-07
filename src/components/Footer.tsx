@@ -134,8 +134,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenQuestionnaire
           <p>© {new Date().getFullYear()} Prakash Graphic Designer & Lead CRM. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-emerald-400" /> 256-Bit SSL Secured</span>
-            <a href="#privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
-            <a href="#terms" className="hover:text-slate-300 transition-colors">Terms & Conditions</a>
+            <button onClick={onOpenQuestionnaire} className="hover:text-slate-300 transition-colors cursor-pointer">Privacy Policy</button>
+            <button onClick={onOpenQuestionnaire} className="hover:text-slate-300 transition-colors cursor-pointer">Terms & Conditions</button>
           </div>
         </div>
       </div>

@@ -41,24 +41,43 @@ export default function App() {
     }, 4000);
   };
 
-  // Fetch all CRM data from Express backend
+  // Fetch all CRM data from Express backend with LocalStorage fallback
   const fetchCrmData = async () => {
     try {
       const [leadsRes, analyticsRes, logsRes] = await Promise.all([
-        fetch('/api/leads'),
-        fetch('/api/analytics'),
-        fetch('/api/notifications/logs')
+        fetch('/api/leads').catch(() => null),
+        fetch('/api/analytics').catch(() => null),
+        fetch('/api/notifications/logs').catch(() => null)
       ]);
 
-      const leadsData = await leadsRes.json();
-      const analyticsData = await analyticsRes.json();
-      const logsData = await logsRes.json();
+      if (leadsRes && leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        if (leadsData.success && Array.isArray(leadsData.leads)) {
+          // Merge with localStorage leads if any
+          const localRaw = localStorage.getItem('prakash_leads');
+          const localLeads: Lead[] = localRaw ? JSON.parse(localRaw) : [];
+          const existingIds = new Set(leadsData.leads.map((l: Lead) => l.id));
+          const uniqueLocal = localLeads.filter(l => !existingIds.has(l.id));
+          setLeads([...uniqueLocal, ...leadsData.leads]);
+        }
+      } else {
+        const localRaw = localStorage.getItem('prakash_leads');
+        if (localRaw) setLeads(JSON.parse(localRaw));
+      }
 
-      if (leadsData.success) setLeads(leadsData.leads);
-      if (analyticsData.success) setAnalytics(analyticsData.analytics);
-      if (logsData.success) setNotificationLogs(logsData.logs);
+      if (analyticsRes && analyticsRes.ok) {
+        const analyticsData = await analyticsRes.json();
+        if (analyticsData.success) setAnalytics(analyticsData.analytics);
+      }
+
+      if (logsRes && logsRes.ok) {
+        const logsData = await logsRes.json();
+        if (logsData.success) setNotificationLogs(logsData.logs);
+      }
     } catch (err) {
-      console.error('Error fetching CRM data:', err);
+      console.warn('Backend API offline, using LocalStorage fallback:', err);
+      const localRaw = localStorage.getItem('prakash_leads');
+      if (localRaw) setLeads(JSON.parse(localRaw));
     }
   };
 

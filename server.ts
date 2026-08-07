@@ -177,8 +177,8 @@ app.post('/api/leads', (req, res) => {
     recaptchaToken
   } = req.body;
 
-  if (!name || !mobile || !email) {
-    return res.status(400).json({ success: false, message: 'Full Name, Mobile Number, and Email are required fields.' });
+  if (!name || !mobile) {
+    return res.status(400).json({ success: false, message: 'Full Name and Mobile Number are required fields.' });
   }
 
   // Get visitor IP address
@@ -258,6 +258,27 @@ app.post('/api/leads', (req, res) => {
     status: 'sent',
     preview: `Dear ${newLead.name}, thank you for inquiring about ${newLead.websiteType}. Prakash Graphic Designer team will review your requirements and get back to you within 2 hours.`
   };
+
+  // Forward to Google Apps Script if URL provided
+  const targetGasUrl = req.body.gasUrl || process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (targetGasUrl && typeof targetGasUrl === 'string' && targetGasUrl.startsWith('http')) {
+    fetch(targetGasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dateTime: formattedDate,
+        name: newLead.name,
+        mobile: newLead.mobile,
+        businessName: newLead.businessName,
+        websiteType: newLead.websiteType,
+        budget: newLead.budget,
+        message: newLead.message,
+        ipAddress: newLead.ipAddress
+      })
+    }).catch(err => {
+      console.warn('Server-side Google Apps Script forward notice:', err.message);
+    });
+  }
 
   logsStore.unshift(adminEmailLog, adminWhatsappLog, clientThankyouLog);
   saveLogs();
