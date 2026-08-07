@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImg from '../assets/images/prakash_logo_1786038840552.jpg';
+import { Palette, Sparkles } from 'lucide-react';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -17,10 +17,10 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   onClick
 }) => {
   const sizeClasses = {
-    sm: { img: 'w-12 h-12', title: 'text-sm sm:text-base', marathiTitle: 'text-xs', tagline: 'text-[10px]' },
-    md: { img: 'w-14 h-14 sm:w-16 sm:h-16', title: 'text-base sm:text-xl', marathiTitle: 'text-xs sm:text-sm', tagline: 'text-[11px] sm:text-xs' },
-    lg: { img: 'w-20 h-20 sm:w-24 sm:h-24', title: 'text-2xl sm:text-3xl', marathiTitle: 'text-base sm:text-lg', tagline: 'text-xs sm:text-sm' },
-    xl: { img: 'w-28 h-28 sm:w-36 sm:h-36', title: 'text-3xl sm:text-4xl', marathiTitle: 'text-xl sm:text-2xl', tagline: 'text-sm sm:text-base' },
+    sm: { iconContainer: 'w-10 h-10', icon: 'w-5 h-5', title: 'text-sm sm:text-base', marathiTitle: 'text-xs', tagline: 'text-[10px]' },
+    md: { iconContainer: 'w-12 h-12 sm:w-14 sm:h-14', icon: 'w-6 h-6 sm:w-7 sm:h-7', title: 'text-base sm:text-xl', marathiTitle: 'text-xs sm:text-sm', tagline: 'text-[11px] sm:text-xs' },
+    lg: { iconContainer: 'w-16 h-16 sm:w-20 sm:h-20', icon: 'w-8 h-8 sm:w-10 sm:h-10', title: 'text-2xl sm:text-3xl', marathiTitle: 'text-base sm:text-lg', tagline: 'text-xs sm:text-sm' },
+    xl: { iconContainer: 'w-20 h-20 sm:w-24 sm:h-24', icon: 'w-10 h-10 sm:w-12 sm:h-12', title: 'text-3xl sm:text-4xl', marathiTitle: 'text-xl sm:text-2xl', tagline: 'text-sm sm:text-base' },
   };
 
   const currentSize = sizeClasses[size];
@@ -30,26 +30,13 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       onClick={onClick}
       className={`flex items-center gap-3.5 group select-none ${onClick ? 'cursor-pointer' : ''} ${className}`}
     >
-      {/* Active Glowing HD Logo Container */}
+      {/* Modern Sleek Vector Icon Container */}
       <div className="relative flex-shrink-0">
         <div className="absolute -inset-1.5 bg-gradient-to-r from-orange-500 via-amber-400 to-cyan-500 rounded-2xl blur-md opacity-80 group-hover:opacity-100 transition duration-300 animate-pulse" />
         
-        <div className={`${currentSize.img} relative rounded-xl sm:rounded-2xl overflow-hidden border-2 border-amber-400/90 bg-slate-950 p-0.5 shadow-2xl shadow-orange-500/30 group-hover:scale-105 transition-transform duration-300`}>
-          <img 
-            src={logoImg} 
-            alt="प्रकाश ग्राफिक्स डिझायनर - Prakash Graphic Designer HD Logo" 
-            className="w-full h-full object-cover rounded-lg sm:rounded-xl"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (target.src !== window.location.origin + '/prakash_logo.jpg') {
-                target.src = '/prakash_logo.jpg';
-              }
-            }}
-          />
+        <div className={`${currentSize.iconContainer} relative rounded-xl sm:rounded-2xl border-2 border-amber-400/90 bg-slate-950 flex items-center justify-center p-2 shadow-2xl shadow-orange-500/30 group-hover:scale-105 transition-transform duration-300`}>
+          <Palette className={`${currentSize.icon} text-amber-400`} />
         </div>
-
-        {/* Badge removed as requested */}
       </div>
 
       {/* Brand Typography & Dual Language Tagline (Marathi + English) */}
