@@ -31,13 +31,23 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'clients', label: 'Clients' },
     { id: 'portfolio', label: 'Portfolio' },
     { id: 'pricing', label: 'Pricing' },
-    { id: 'contact', label: 'Contact' }
+    { id: 'contact', label: 'Contact' },
+    { id: 'admin-login', label: 'Admin Login' }
   ];
 
   const handleNavClick = (id: string) => {
+    setMobileMenuOpen(false);
+    if (id === 'admin-login') {
+      if (isAdminLoggedIn) {
+        setActiveView(activeView === 'admin' ? 'public' : 'admin');
+      } else {
+        onOpenAdmin();
+      }
+      return;
+    }
+
     setActiveView('public');
     setActiveTab(id);
-    setMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });

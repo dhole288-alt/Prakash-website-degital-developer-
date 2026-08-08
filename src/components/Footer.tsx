@@ -70,6 +70,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenQuestionnaire
               <li><a href="#portfolio" className="hover:text-white transition-colors">Client Portfolio</a></li>
               <li><a href="#pricing" className="hover:text-white transition-colors">Website Pricing Plans</a></li>
               <li><button onClick={onOpenQuestionnaire} className="hover:text-white transition-colors text-left">Scope Builder Questionnaire</button></li>
+              <li>
+                <button
+                  onClick={onOpenAdmin}
+                  className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors text-left flex items-center gap-1 mt-1"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Admin Login & CRM Portal</span>
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -132,8 +141,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenQuestionnaire
         {/* Bottom Bar */}
         <div className="border-t border-slate-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} Prakash Graphic Designer & Lead CRM. All rights reserved.</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-emerald-400" /> 256-Bit SSL Secured</span>
+            <button onClick={onOpenAdmin} className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors cursor-pointer flex items-center gap-1">
+              <LayoutDashboard className="w-3 h-3" />
+              <span>Admin Login</span>
+            </button>
             <button onClick={onOpenQuestionnaire} className="hover:text-slate-300 transition-colors cursor-pointer">Privacy Policy</button>
             <button onClick={onOpenQuestionnaire} className="hover:text-slate-300 transition-colors cursor-pointer">Terms & Conditions</button>
           </div>
