@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck, KeyRound, UserPlus, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { AdminUser } from '../types';
+import { registerUserInFirebase } from '../lib/firebaseService';
 
 interface AdminLoginModalProps {
   isOpen: boolean;
@@ -183,8 +184,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
 
       const data = await response.json();
       if (data.success && data.user) {
-        // Save to local storage cache as well
+        // Save to local storage cache & Firebase Firestore
         saveToLocalStorageUser({ name: cleanName, email: cleanEmail, password: cleanPassword, role });
+        registerUserInFirebase({ name: cleanName, email: cleanEmail, role }).catch(() => {});
+
         setSuccessMsg('Account registered successfully! Logging you in...');
         setTimeout(() => {
           onLoginSuccess(data.user);

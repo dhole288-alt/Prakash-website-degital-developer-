@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Send, CheckCircle2, Sparkles, AlertCircle, ChevronDown, Lock, CreditCard, MessageSquare, PhoneCall, Mail } from 'lucide-react';
 import { Lead } from '../types';
 import { submitToGoogleSheets } from '../lib/googleSheetsService';
+import { saveLeadToFirebase } from '../lib/firebaseService';
 
 interface QuickEnquiryFormProps {
   onSuccessSubmit: (lead: Lead) => void;
@@ -85,6 +86,27 @@ export const QuickEnquiryForm: React.FC<QuickEnquiryFormProps> = ({ onSuccessSub
       localStorage.setItem('prakash_leads', JSON.stringify(leadsArr));
     } catch (e) {
       console.warn('LocalStorage save failed:', e);
+    }
+
+    // Save to Firebase Firestore (degital-website project)
+    try {
+      saveLeadToFirebase({
+        name: newLead.name,
+        mobile: newLead.mobile,
+        whatsapp: newLead.whatsapp,
+        email: newLead.email,
+        businessName: newLead.businessName,
+        businessCategory: newLead.businessCategory,
+        city: newLead.city,
+        service: newLead.service,
+        websiteType: newLead.websiteType,
+        budget: newLead.budget,
+        message: newLead.message,
+        source: newLead.source,
+        status: newLead.status,
+      }).catch(e => console.warn('Firebase save warning:', e));
+    } catch (e) {
+      console.warn('Firebase sync notice:', e);
     }
 
     // Submit to Google Sheets and Express backend
