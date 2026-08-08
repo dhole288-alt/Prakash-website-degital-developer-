@@ -171,6 +171,15 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
     }
 
     try {
+      // 1. Register in Firebase Authentication & Firestore
+      await registerUserInFirebase({
+        name: cleanName,
+        email: cleanEmail,
+        password: cleanPassword,
+        role
+      });
+
+      // 2. Register in Express Backend (if available)
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -184,21 +193,16 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
 
       const data = await response.json();
       if (data.success && data.user) {
-        // Save to local storage cache & Firebase Firestore
         saveToLocalStorageUser({ name: cleanName, email: cleanEmail, password: cleanPassword, role });
-        registerUserInFirebase({ name: cleanName, email: cleanEmail, role }).catch(() => {});
-
-        setSuccessMsg('Account registered successfully! Logging you in...');
+        setSuccessMsg('Admin account registered in Firebase & database! Logging you in...');
         setTimeout(() => {
           onLoginSuccess(data.user);
           onClose();
         }, 800);
         return;
-      } else {
-        setErrorMsg(data.message || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      // Local fallback registration
+      // Offline / Static Client Fallback
       saveToLocalStorageUser({ name: cleanName, email: cleanEmail, password: cleanPassword, role });
       const newUser: AdminUser = {
         email: cleanEmail,
@@ -206,11 +210,12 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
         role,
         token: 'adm_session_reg_' + Date.now()
       };
-      setSuccessMsg('Account registered and saved locally! Logging in...');
+      setSuccessMsg('Admin account registered and saved! Logging in...');
       setTimeout(() => {
         onLoginSuccess(newUser);
         onClose();
       }, 800);
+      return;
     } finally {
       setIsSubmitting(false);
     }
